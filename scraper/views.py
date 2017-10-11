@@ -18,7 +18,7 @@ def get_artists(page):
     artists = []
 
     artists_ugly = artists_object.select('td a')
-    artists_ugly_length = len(artists_ugly) / 3
+    artists_ugly_length = int(len(artists_ugly) / 3)
 
     for i in range(artists_ugly_length):
         artist = {}
