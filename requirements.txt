@@ -6,3 +6,4 @@ whitenoise==3.3.0
 feedparser>=1.0
 djangorestframework==3.5.4
 Pillow==3.1.2
+drf-generators==0.2.8
