@@ -20,10 +20,12 @@ def get_infos(url, page=0, indent=0):
 
     infos = []
 
-    infos_ugly = infos_object.select('td a[class!="button"]')
+    infos_ugly = infos_object.select('td a')
     infos_ugly_length = int(len(infos_ugly) / 3)
 
     for i in range(infos_ugly_length):
+        if infos_ugly[i].get('class') == "button":
+            continue
         info = {}
         info['name'] = infos_ugly[i * 3].getText()
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
