@@ -56,8 +56,7 @@ def scrap(request, page):
 
     for artist in artists:
         post_data = {'name': artist['name']}
-        # https://mozikascraper.herokuapp.com
-        response = requests.post('http://127.0.0.1:8000/scraper/artist/', data=post_data)
+        response = requests.post('https://mozikascraper.herokuapp.com/scraper/artist/', data=post_data)
         artist_id = json.loads(response.content)['id']
         next_songs = artist['url']
         i = 0
@@ -68,7 +67,7 @@ def scrap(request, page):
 
             for song in songs:
                 post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': get_song(song['url'])}
-                requests.post('http://127.0.0.1:8000/scraper/song/', data=post_daty)
+                requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
 
     html = "<html><body>Done!</body></html>"
     return HttpResponse(html)
