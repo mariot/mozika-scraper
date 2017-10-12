@@ -29,7 +29,7 @@ def get_infos(url, page=0, indent=0):
 
     for i in range(infos_ugly_length):
         info = {}
-        info['name'] = infos_ugly[i * 3].getText().encode('ascii').strip()
+        info['name'] = infos_ugly[i * 3].getText().encode('ascii', 'ignore').strip()
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
         infos.append(info)
 
@@ -46,7 +46,7 @@ def get_song(url):
     song_object.find('div', {'class': 'hevitra'}).extract()
     song_object.find('b').extract()
 
-    return song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText().encode('ascii').strip()
+    return song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText().encode('ascii', 'ignore').strip()
 
 
 def scrap(request, page):
