@@ -7,6 +7,7 @@ from django.http import HttpResponse
 import requests
 import bs4
 import json
+import logging
 
 
 def get_infos(url, page=0, indent=0):
@@ -21,17 +22,31 @@ def get_infos(url, page=0, indent=0):
     infos = []
 
     infos_ugly = infos_object.select('td a')
+    if infos_ugly[0].get('class') != None:
+        if infos_ugly[0].get('class')[0] == 'button':
+            infos_ugly.pop(0)
     infos_ugly_length = int(len(infos_ugly) / 3)
 
     for i in range(infos_ugly_length):
-        if infos_ugly[i].get('class') == "button":
-            continue
         info = {}
-        info['name'] = infos_ugly[i * 3].getText()
+        info['name'] = infos_ugly[i * 3].getText().encode('ascii').strip()
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
         infos.append(info)
 
     return infos, next
+
+
+def get_song(url):
+    song_page = requests.get(url)
+    song_page.raise_for_status()
+
+    song_object = bs4.BeautifulSoup(song_page.text, "html.parser")
+    song_object.find('div', {'class': 'sharebox'}).extract()
+    song_object.find('div', {'class': 'adminbox'}).extract()
+    song_object.find('div', {'class': 'hevitra'}).extract()
+    song_object.find('b').extract()
+
+    return song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText().encode('ascii').strip()
 
 
 def scrap(request, page):
@@ -41,14 +56,21 @@ def scrap(request, page):
 
     for artist in artists:
         post_data = {'name': artist['name']}
-        response = requests.post('https://mozikascraper.herokuapp.com/scraper/artist/', data=post_data)
+        # https://mozikascraper.herokuapp.com
+        response = requests.post('http://127.0.0.1:8000/scraper/artist/', data=post_data)
         artist_id = json.loads(response.content)['id']
-        songs, next_songs = get_infos(next_songs, '', 0)
-        for song in songs:
-            post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': 'hello'}
-            requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
+        next_songs = artist['url']
+        i = 0
+        while next_songs:
+            page_interne = i * 20
+            songs, next_songs = get_infos(artist['url'][:-1], page_interne, 0)
+            i = i + 1
 
-    html = "<html><body>Next page: %s.</body></html>" % (page_in_url + 20)
+            for song in songs:
+                post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': get_song(song['url'])}
+                requests.post('http://127.0.0.1:8000/scraper/song/', data=post_daty)
+
+    html = "<html><body>Done!</body></html>"
     return HttpResponse(html)
 
 
