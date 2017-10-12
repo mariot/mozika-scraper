@@ -10,7 +10,7 @@ import json
 import logging
 
 
-def get_infos(url, page=0, indent=0):
+def get_infos(url, page, indent):
     infos_page = requests.get(url + str(page))
     infos_page.raise_for_status()
 
@@ -22,10 +22,11 @@ def get_infos(url, page=0, indent=0):
     infos = []
 
     infos_ugly = infos_object.select('td a')
-    if infos_ugly[0].get('class') != None:
-        if infos_ugly[0].get('class')[0] == 'button':
-            infos_ugly.pop(0)
     infos_ugly_length = int(len(infos_ugly) / 3)
+    if infos_ugly_length > 0:
+        if infos_ugly[0].get('class') != None:
+            if infos_ugly[0].get('class')[0] == 'button':
+                infos_ugly.pop(0)
 
     for i in range(infos_ugly_length):
         info = {}
@@ -50,7 +51,7 @@ def get_song(url):
 
 
 def scrap(request, page):
-    page_in_url = page * 20
+    page_in_url = int(page) * 20
 
     artists, next_artists = get_infos('http://tononkira.serasera.org/tononkira/mpihira/results/', page_in_url, 1)
 
