@@ -47,7 +47,7 @@ def scrap(request, page):
         while next_songs:
             songs, next_songs = get_infos(next_songs, '', 0)
             for song in songs:
-                post_daty = {'name': song['name'], 'artist': artist_id, 'lyrics': 'hello'}
+                post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': 'hello'}
                 requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
 
     html = "<html><body>Next page: %s.</body></html>" % (page_in_url + 20)
