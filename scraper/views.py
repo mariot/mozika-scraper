@@ -9,36 +9,46 @@ import bs4
 import json
 
 
-def get_artists(page):
-    artists_page = requests.get('http://tononkira.serasera.org/tononkira/mpihira/results/' + str(page))
-    artists_page.raise_for_status()
+def get_infos(url, page=0, indent=0):
+    infos_page = requests.get(url + str(page))
+    infos_page.raise_for_status()
 
-    artists_object = bs4.BeautifulSoup(artists_page.text, "html.parser")
+    infos_object = bs4.BeautifulSoup(infos_page.text, "html.parser")
+    next = infos_object.find('a', text='>')
+    if next:
+        next = next.get('href')
 
-    artists = []
+    infos = []
 
-    artists_ugly = artists_object.select('td a')
-    artists_ugly_length = int(len(artists_ugly) / 3)
+    infos_ugly = infos_object.select('td a[class!="button"]')
+    infos_ugly_length = int(len(infos_ugly) / 3)
 
-    for i in range(artists_ugly_length):
-        artist = {}
-        artist['name'] = artists_ugly[i * 3].getText()
-        artist['songsURL'] = artists_ugly[(i * 3) + 1].get('href')
-        artists.append(artist)
+    for i in range(infos_ugly_length):
+        info = {}
+        info['name'] = infos_ugly[i * 3].getText()
+        info['url'] = infos_ugly[(i * 3) + indent].get('href')
+        infos.append(info)
 
-    return artists
+    return infos, next
+
 
 def scrap(request, page):
     page_in_url = page * 20
 
-    artists = get_artists(page_in_url)
+    artists, next_artists = get_infos('http://tononkira.serasera.org/tononkira/mpihira/results/', page_in_url, 1)
 
     for artist in artists:
         post_data = {'name': artist['name']}
         response = requests.post('https://mozikascraper.herokuapp.com/scraper/artist/', data=post_data)
         artist_id = json.loads(response.content)['id']
+        next_songs = artist['url']
+        while next_songs:
+            songs, next_songs = get_infos(next_songs, '', 0)
+            for song in songs:
+                post_daty = {'name': song['name'], 'artist': artist_id, 'lyrics': 'hello'}
+                requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
 
-    html = "<html><body>Page: %s.</body></html>" % page
+    html = "<html><body>Next page: %s.</body></html>" % (page_in_url + 20)
     return HttpResponse(html)
 
 
