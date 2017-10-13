@@ -42,10 +42,14 @@ def get_song(url):
     song_page.raise_for_status()
 
     song_object = bs4.BeautifulSoup(song_page.text, "html.parser")
-    song_object.find('div', {'class': 'sharebox'}).extract()
-    song_object.find('div', {'class': 'adminbox'}).extract()
-    song_object.find('div', {'class': 'hevitra'}).extract()
-    song_object.find('b').extract()
+    try {
+        song_object.find('div', {'class': 'sharebox'}).extract()
+        song_object.find('div', {'class': 'adminbox'}).extract()
+        song_object.find('div', {'class': 'hevitra'}).extract()
+        song_object.find('b').extract()
+    } except(Exception e){
+
+    }
 
     return song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText().encode('ascii', 'ignore').strip()
 
