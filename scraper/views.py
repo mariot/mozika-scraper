@@ -47,6 +47,8 @@ def get_song(url):
         song_object.find('div', {'class': 'adminbox'}).extract()
         song_object.find('div', {'class': 'hevitra'}).extract()
         song_object.find('b').extract()
+    except:
+        pass
 
     return song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText().encode('ascii', 'ignore').strip()
 
