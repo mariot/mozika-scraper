@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.shortcuts import render_to_response
 from rest_framework import viewsets
 # from rest_framework import filters
 from django_filters import rest_framework as filters
@@ -78,6 +79,10 @@ def scrap(request, page):
 
     html = "<html><body><a href='http://mozikascraper.herokuapp.com/scraper/scrap/"+str(next_page)+"/'>Next</a></body></html>"
     return HttpResponse(html)
+
+
+def policy(request):
+    return render_to_response('privacypolicy.html')
 
 
 class ArtistViewSet(viewsets.ModelViewSet):
