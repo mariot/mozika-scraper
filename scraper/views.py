@@ -1,13 +1,15 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.viewsets import ViewSet
+from rest_framework import viewsets
+# from rest_framework import filters
+from django_filters import rest_framework as filters
 from rest_framework.response import Response
+# from django_filters.rest_framework import DjangoFilterBackend
 from scraper.serializers import ArtistSerializer, SongSerializer
 from scraper.models import Artist, Song
 from django.http import HttpResponse
 import requests
 import bs4
 import json
-import logging
 
 
 def get_infos(url, page, indent):
@@ -55,6 +57,7 @@ def get_song(url):
 
 def scrap(request, page):
     page_in_url = int(page) * 20
+    next_page = int(page) + 1
 
     artists, next_artists = get_infos('http://tononkira.serasera.org/tononkira/mpihira/results/', page_in_url, 1)
 
@@ -73,85 +76,29 @@ def scrap(request, page):
                 post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': get_song(song['url'])}
                 requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
 
-    html = "<html><body>Done!</body></html>"
+    html = "<html><body><a href='http://mozikascraper.herokuapp.com/scraper/scrap/"+str(next_page)+"/'>Next</a></body></html>"
     return HttpResponse(html)
 
 
-class ArtistViewSet(ViewSet):
+class ArtistViewSet(viewsets.ModelViewSet):
 
-    def list(self, request):
-        queryset = Artist.objects.all()
-        serializer = ArtistSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def create(self, request):
-        serializer = ArtistSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-
-    def retrieve(self, request, pk=None):
-        queryset = Artist.objects.all()
-        item = get_object_or_404(queryset, pk=pk)
-        serializer = ArtistSerializer(item)
-        return Response(serializer.data)
-
-    def update(self, request, pk=None):
-        try:
-            item = Artist.objects.get(pk=pk)
-        except Artist.DoesNotExist:
-            return Response(status=404)
-        serializer = ArtistSerializer(item, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
-
-    def destroy(self, request, pk=None):
-        try:
-            item = Artist.objects.get(pk=pk)
-        except Artist.DoesNotExist:
-            return Response(status=404)
-        item.delete()
-        return Response(status=204)
+    queryset = Artist.objects.all()
+    serializer_class = ArtistSerializer
 
 
-class SongViewSet(ViewSet):
+class SongFilter(filters.FilterSet):
+    title = filters.CharFilter(lookup_expr='icontains')
+    artist__name = filters.CharFilter(lookup_expr='icontains')
 
-    def list(self, request):
-        queryset = Song.objects.all()
-        serializer = SongSerializer(queryset, many=True)
-        return Response(serializer.data)
+    class Meta:
+        model = Song
+        fields = []
 
-    def create(self, request):
-        serializer = SongSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
 
-    def retrieve(self, request, pk=None):
-        queryset = Song.objects.all()
-        item = get_object_or_404(queryset, pk=pk)
-        serializer = SongSerializer(item)
-        return Response(serializer.data)
+class SongViewSet(viewsets.ModelViewSet):
 
-    def update(self, request, pk=None):
-        try:
-            item = Song.objects.get(pk=pk)
-        except Song.DoesNotExist:
-            return Response(status=404)
-        serializer = SongSerializer(item, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
-
-    def destroy(self, request, pk=None):
-        try:
-            item = Song.objects.get(pk=pk)
-        except Song.DoesNotExist:
-            return Response(status=404)
-        item.delete()
-        return Response(status=204)
+    queryset = Song.objects.all()
+    serializer_class = SongSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('title',)
+    filter_class = SongFilter
