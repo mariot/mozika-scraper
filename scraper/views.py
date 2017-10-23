@@ -31,7 +31,7 @@ def get_infos(url, page, indent):
     for i in range(infos_ugly_length):
         info = {}
         name = unicodedata.normalize('NFD', infos_ugly[i * 3].getText()).encode('ascii', 'ignore')
-        info['name'] = ''.join(e for e in name if e.isalnum())
+        info['name'] = ''.join(e for e in name if str(e).isalnum())
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
         infos.append(info)
 
@@ -75,7 +75,7 @@ def scrap(request, page):
                 post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': get_song(song['url'])}
                 requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
 
-    html = "<html><body><a href='http://mozikascraper.herokuapp.com/scraper/scrap/"+str(next_page)+"/'>Next</a></body></html>"
+    html = "<html><body><a href='http://127.0.0.1:8000/scraper/scrap/"+str(next_page)+"/'>Next</a></body></html>"
     return HttpResponse(html)
 
 
