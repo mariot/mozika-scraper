@@ -11,6 +11,7 @@ from django.http import HttpResponse
 import requests
 import bs4
 import json
+import unicodedata
 
 
 def get_infos(url, page, indent):
@@ -33,7 +34,7 @@ def get_infos(url, page, indent):
 
     for i in range(infos_ugly_length):
         info = {}
-        info['name'] = infos_ugly[i * 3].getText().encode('ascii', 'ignore').strip()
+        info['name'] = unicodedata.normalize('NFD', infos_ugly[i * 3].getText()).encode('ascii', 'ignore').strip()
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
         infos.append(info)
 
@@ -53,7 +54,7 @@ def get_song(url):
     except:
         pass
 
-    return song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText().encode('ascii', 'ignore').strip()
+    return unicodedata.normalize('NFD', song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText()).encode('ascii', 'ignore').strip()
 
 
 def scrap(request, page):
