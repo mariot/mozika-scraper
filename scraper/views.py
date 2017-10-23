@@ -31,7 +31,7 @@ def get_infos(url, page, indent):
     for i in range(infos_ugly_length):
         info = {}
         name = unicodedata.normalize('NFD', infos_ugly[i * 3].getText()).encode('ascii', 'ignore')
-        info['name'] = name.replace(" ", "")
+        info['name'] = ''.join(e for e in name if e.isalnum())
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
         infos.append(info)
 
