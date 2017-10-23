@@ -1,10 +1,6 @@
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
 from rest_framework import viewsets
-# from rest_framework import filters
 from django_filters import rest_framework as filters
-from rest_framework.response import Response
-# from django_filters.rest_framework import DjangoFilterBackend
 from scraper.serializers import ArtistSerializer, SongSerializer
 from scraper.models import Artist, Song
 from django.http import HttpResponse
@@ -19,16 +15,16 @@ def get_infos(url, page, indent):
     infos_page.raise_for_status()
 
     infos_object = bs4.BeautifulSoup(infos_page.text, "html.parser")
-    next = infos_object.find('a', text='>')
-    if next:
-        next = next.get('href')
+    next_obj = infos_object.find('a', text='>')
+    if next_obj:
+        next_obj = next_obj.get('href')
 
     infos = []
 
     infos_ugly = infos_object.select('td a')
     infos_ugly_length = int(len(infos_ugly) / 3)
     if infos_ugly_length > 0:
-        if infos_ugly[0].get('class') != None:
+        if infos_ugly[0].get('class') is not None:
             if infos_ugly[0].get('class')[0] == 'button':
                 infos_ugly.pop(0)
 
@@ -39,7 +35,7 @@ def get_infos(url, page, indent):
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
         infos.append(info)
 
-    return infos, next
+    return infos, next_obj
 
 
 def get_song(url):
