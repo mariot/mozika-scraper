@@ -8,7 +8,10 @@ import requests
 import bs4
 import json
 import unicodedata
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 def get_infos(url, page, indent):
     infos_page = requests.get(url + str(page))
@@ -33,6 +36,7 @@ def get_infos(url, page, indent):
         name = unicodedata.normalize('NFD', infos_ugly[i * 3].getText()).encode('ascii', 'ignore')
         info['name'] = ''.join(e for e in name if str(e).isalnum())
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
+        info['other_name'] = infos_ugly[(i * 3) + 1].getText()
         infos.append(info)
 
     return infos, next_obj
@@ -80,6 +84,21 @@ def scrap(request, page):
                 requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
 
     html = "<html><body><a href='http://127.0.0.1:8000/scraper/scrap/"+str(next_page)+"/'>Next</a></body></html>"
+    return HttpResponse(html)
+
+
+def scrap_artist(request, id, artist, page):
+    page_in_url = int(page) * 20
+    next_page = int(page) + 1
+
+    songs, next_songs = get_infos('http://tononkira.serasera.org/tononkira/hira/index/' + str(id) + '/', page_in_url, 0)
+
+    for song in songs:
+        post_daty = {'title': song['name'], 'artist': artist, 'lyrics': get_song(song['url'])}
+        print post_daty
+        requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
+
+    html = "<html><body><a href='http://127.0.0.1:8000/scraper/scrap_artist/"+str(id)+"/"+str(next_page)+"/'>Next</a></body></html>"
     return HttpResponse(html)
 
 
