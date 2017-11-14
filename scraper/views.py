@@ -95,7 +95,6 @@ def scrap_artist(request, id, artist, page):
 
     for song in songs:
         post_daty = {'title': song['name'], 'artist': artist, 'lyrics': get_song(song['url'])}
-        print post_daty
         requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
 
     html = "<html><body><a href='http://127.0.0.1:8000/scraper/scrap_artist/"+str(id)+"/"+str(next_page)+"/'>Next</a></body></html>"
