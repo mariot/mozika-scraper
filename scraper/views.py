@@ -72,7 +72,7 @@ def scrap(request, page):
     for artist in artists:
         post_data = {'name': artist['name']}
         response = requests.post('https://mozikascraper.hianatra.com/scraper/artist/', data=post_data)
-        artist_id = json.loads(response.content)['id']
+        artist_id = json.loads(response.content.decode('utf-8'))['id']
         next_songs = artist['url']
         i = 0
         while next_songs:
