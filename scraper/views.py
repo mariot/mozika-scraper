@@ -13,6 +13,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def get_infos(url, page, indent):
     infos_page = requests.get(url + str(page))
     infos_page.raise_for_status()
