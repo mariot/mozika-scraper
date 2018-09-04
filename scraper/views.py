@@ -34,7 +34,7 @@ def get_infos(url, page, indent):
 
     for i in range(infos_ugly_length):
         info = {}
-        name = unicodedata.normalize('NFD', infos_ugly[i * 3].getText()).encode('ascii', 'ignore')
+        name = unicodedata.normalize('NFD', infos_ugly[i * 3].getText())
         info['name'] = ''.join(e for e in name if str(e).isalnum())
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
         info['other_name'] = infos_ugly[(i * 3) + 1].getText()
@@ -56,7 +56,7 @@ def get_song(url):
     except AttributeError:
         pass
     try:
-        song = song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText().encode('ascii', 'ignore')
+        song = song_object.find('div', {'class': 'col l-2-3 s-1-1'}).getText()
     except AttributeError:
         song = "Mbola tsy tafiditra ny tononkira"
 
