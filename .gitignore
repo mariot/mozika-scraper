@@ -1,6 +1,7 @@
 venv
 *.pyc
-staticfiles
+static/
 .env
 db.sqlite3
 .idea/
+mozikaenv/
