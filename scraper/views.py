@@ -70,7 +70,7 @@ def scrap(request, page):
 
     for artist in artists:
         post_data = {'name': artist['name']}
-        response = requests.post('https://mozikascraper.herokuapp.com/scraper/artist/', data=post_data)
+        response = requests.post('https://mozikascraper.hianatra.com/scraper/artist/', data=post_data)
         artist_id = json.loads(response.content)['id']
         next_songs = artist['url']
         i = 0
@@ -81,9 +81,9 @@ def scrap(request, page):
 
             for song in songs:
                 post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': get_song(song['url'])}
-                requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
+                requests.post('https://mozikascraper.hianatra.com/scraper/song/', data=post_daty)
 
-    html = "<html><body><a href='http://127.0.0.1:8000/scraper/scrap/"+str(next_page)+"/'>Next</a></body></html>"
+    html = "<html><body><a href='https://mozikascraper.hianatra.com/scraper/scrap/"+str(next_page)+"/'>Next</a></body></html>"
     return HttpResponse(html)
 
 
@@ -95,9 +95,9 @@ def scrap_artist(request, id, artist, page):
 
     for song in songs:
         post_daty = {'title': song['name'], 'artist': artist, 'lyrics': get_song(song['url'])}
-        requests.post('https://mozikascraper.herokuapp.com/scraper/song/', data=post_daty)
+        requests.post('https://mozikascraper.hianatra.com/scraper/song/', data=post_daty)
 
-    html = "<html><body><a href='http://127.0.0.1:8000/scraper/scrap_artist/"+str(id)+"/"+str(next_page)+"/'>Next</a></body></html>"
+    html = "<html><body><a href='https://mozikascraper.hianatra.com/scraper/scrap_artist/"+str(id)+"/"+str(next_page)+"/'>Next</a></body></html>"
     return HttpResponse(html)
 
 
