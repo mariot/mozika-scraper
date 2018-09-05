@@ -72,7 +72,7 @@ def scrap(request, page):
     artists, next_artists = get_infos('http://tononkira.serasera.org/tononkira/mpihira/results/', page_in_url, 1)
 
     for artist in artists:
-        post_data = {'name': artist['name']}
+        post_data = {'name': artist['name'], 'real_name': artist['real_name']}
         response = requests.post('https://mozikascraper.hianatra.com/scraper/artist/', data=post_data)
         artist_id = json.loads(response.content.decode('utf-8'))['id']
         next_songs = artist['url']
@@ -83,7 +83,8 @@ def scrap(request, page):
             i = i + 1
 
             for song in songs:
-                post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': get_song(song['url'])}
+                post_daty = {'title': song['name'], 'real_title': song['real_name'],
+                             'artist': artist_id, 'lyrics': get_song(song['url'])}
                 requests.post('https://mozikascraper.hianatra.com/scraper/song/', data=post_daty)
 
     html = "<html><body><a href='https://mozikascraper.hianatra.com/scraper/scrap/"+str(next_page) + \
