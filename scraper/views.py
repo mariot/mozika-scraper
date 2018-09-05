@@ -142,29 +142,29 @@ def find_me(request, artist_name, song_title):
     artists = list(Artist.objects.values_list('real_name', flat=True))
     if artists:
         probable_artists = process.extract(artist_name, artists, limit=3)
-        if probable_artists and probable_artists[0][1] > 60:
+        if probable_artists and probable_artists[0][1] > 70:
             for artist in probable_artists:
                 songs = list(Song.objects.filter(artist__real_name=artist[0]).values_list('real_title', flat=True))
                 if songs:
                     probable_song = process.extractOne(song_title, songs)
                 else:
                     break
-                if probable_song and probable_song[1] > 60:
+                if probable_song and probable_song[1] > 70:
                     song = Song.objects.filter(real_title=probable_song[0], artist__real_name=artist[0])[0]
                     del(song.__dict__['_state'])
                     del(song.__dict__['id'])
                     del(song.__dict__['artist_id'])
                     song.__dict__['artist'] = artist[0]
                     return JsonResponse(song.__dict__)
-            old_artist = Artist.objects.get(real_name=probable_artists[0][0])
-            new_song = Song(artist=old_artist, title=title, real_title=song_title, lyrics='Mbola tsy misy')
-            new_song.save()
+            # old_artist = Artist.objects.get(real_name=probable_artists[0][0])
+            # new_song = Song(artist=old_artist, title=title, real_title=song_title, lyrics='Mbola tsy misy')
+            # new_song.save()
             return JsonResponse({})
         else:
-            new_artist = Artist(name=name, real_name=artist_name)
-            new_artist.save()
-            new_song = Song(artist=new_artist, title=title, real_title=song_title, lyrics='Mbola tsy misy')
-            new_song.save()
+            # new_artist = Artist(name=name, real_name=artist_name)
+            # new_artist.save()
+            # new_song = Song(artist=new_artist, title=title, real_title=song_title, lyrics='Mbola tsy misy')
+            # new_song.save()
             return JsonResponse({})
     return JsonResponse({})
 
