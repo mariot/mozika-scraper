@@ -9,3 +9,4 @@ drf-generators==0.2.8
 beautifulsoup4==4.4.1
 requests==2.9.1
 django-filter==1.1.0
+fuzzywuzzy==0.17.0

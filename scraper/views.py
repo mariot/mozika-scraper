@@ -3,7 +3,8 @@ from rest_framework import viewsets
 from django_filters import rest_framework as filters
 from scraper.serializers import ArtistSerializer, SongSerializer
 from scraper.models import Artist, Song
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from fuzzywuzzy import process
 import requests
 import bs4
 import json
@@ -36,6 +37,7 @@ def get_infos(url, page, indent):
         info = {}
         name = unicodedata.normalize('NFD', infos_ugly[i * 3].getText())
         info['name'] = ''.join(e for e in name if str(e).isalnum())
+        info['real_name'] = name
         info['url'] = infos_ugly[(i * 3) + indent].get('href')
         info['other_name'] = infos_ugly[(i * 3) + 1].getText()
         infos.append(info)
@@ -84,7 +86,8 @@ def scrap(request, page):
                 post_daty = {'title': song['name'], 'artist': artist_id, 'lyrics': get_song(song['url'])}
                 requests.post('https://mozikascraper.hianatra.com/scraper/song/', data=post_daty)
 
-    html = "<html><body><a href='https://mozikascraper.hianatra.com/scraper/scrap/"+str(next_page)+"/'>Next</a></body></html>"
+    html = "<html><body><a href='https://mozikascraper.hianatra.com/scraper/scrap/"+str(next_page) + \
+           "/'>Next</a></body></html>"
     return HttpResponse(html)
 
 
@@ -98,8 +101,75 @@ def scrap_artist(request, id, artist, page):
         post_daty = {'title': song['name'], 'artist': artist, 'lyrics': get_song(song['url'])}
         requests.post('https://mozikascraper.hianatra.com/scraper/song/', data=post_daty)
 
-    html = "<html><body><a href='https://mozikascraper.hianatra.com/scraper/scrap_artist/"+str(id)+"/"+str(next_page)+"/'>Next</a></body></html>"
+    html = "<html><body><a href='https://mozikascraper.hianatra.com/scraper/scrap_artist/" + \
+           str(id)+"/"+str(next_page) + "/'>Next</a></body></html>"
     return HttpResponse(html)
+
+
+def scrap_titles(request, page):
+    page_in_url = int(page) * 20
+    next_page = int(page) + 1
+
+    artists, next_artists = get_infos('http://tononkira.serasera.org/tononkira/mpihira/results/', page_in_url, 1)
+
+    for artist in artists:
+        old_artist = Artist.objects.get(name=artist['name'])
+        old_artist.real_name = artist['real_name']
+        old_artist.save()
+        next_songs = artist['url']
+        i = 0
+        while next_songs:
+            page_interne = i * 20
+            songs, next_songs = get_infos(artist['url'][:-1], page_interne, 0)
+            i = i + 1
+
+            for song in songs:
+                old_song = Song.objects.get(name=song['name'])
+                old_song.real_title = song['real_name']
+                old_song.save()
+
+    html = "<html><body><a href='https://mozikascraper.hianatra.com/scraper/scrap_titles/"+str(next_page) + \
+           "/'>Next</a></body></html>"
+    return HttpResponse(html)
+
+
+def find_me(request, artist_name, song_title):
+    name = unicodedata.normalize('NFD', artist_name)
+    name = ''.join(e for e in name if str(e).isalnum())
+    title = unicodedata.normalize('NFD', song_title)
+    title = ''.join(e for e in title if str(e).isalnum())
+    # artists = list(Artist.objects.values_list('real_name', flat=True))
+    artists = list(Artist.objects.values_list('name', flat=True))
+    if artists:
+        probable_artists = process.extract(artist_name, artists, limit=3)
+        if probable_artists and probable_artists[0][1] > 60:
+            for artist in probable_artists:
+                # songs = list(Song.objects.filter(artist__name=artist[0]).values_list('real_title', flat=True))
+                songs = list(Song.objects.filter(artist__name=artist[0]).values_list('title', flat=True))
+                if songs:
+                    probable_song = process.extractOne(song_title, songs)
+                else:
+                    break
+                if probable_song and probable_song[1] > 60:
+                    # song = Song.objects.get(real_title=probable_song[0], artist__name=artist[0])
+                    song = Song.objects.get(title=probable_song[0], artist__name=artist[0])
+                    del(song.__dict__['_state'])
+                    del(song.__dict__['id'])
+                    del(song.__dict__['artist_id'])
+                    song.__dict__['artist'] = artist[0]
+                    return JsonResponse(song.__dict__)
+            # old_artist = Artist.objects.get(real_name=probable_artists[0][0])
+            old_artist = Artist.objects.get(name=probable_artists[0][0])
+            new_song = Song(artist=old_artist, title=title, real_title=song_title, lyrics='Mbola tsy misy')
+            new_song.save()
+            return JsonResponse({})
+        else:
+            new_artist = Artist(name=name, real_name=artist_name)
+            new_artist.save()
+            new_song = Song(artist=new_artist, title=title, real_title=song_title, lyrics='Mbola tsy misy')
+            new_song.save()
+            return JsonResponse({})
+    return JsonResponse({})
 
 
 def policy(request):
