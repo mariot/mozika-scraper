@@ -135,10 +135,10 @@ def scrap_titles(request, page):
 
 
 def find_me(request, artist_name, song_title):
-    name = unicodedata.normalize('NFD', artist_name)
-    name = ''.join(e for e in name if str(e).isalnum())
-    title = unicodedata.normalize('NFD', song_title)
-    title = ''.join(e for e in title if str(e).isalnum())
+    # name = unicodedata.normalize('NFD', artist_name)
+    # name = ''.join(e for e in name if str(e).isalnum())
+    # title = unicodedata.normalize('NFD', song_title)
+    # title = ''.join(e for e in title if str(e).isalnum())
     artists = list(Artist.objects.values_list('real_name', flat=True))
     if artists:
         probable_artists = process.extract(artist_name, artists, limit=3)
