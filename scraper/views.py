@@ -113,7 +113,7 @@ def scrap_titles(request, page):
     artists, next_artists = get_infos('http://tononkira.serasera.org/tononkira/mpihira/results/', page_in_url, 1)
 
     for artist in artists:
-        old_artist = Artist.objects.get(name=artist['name'])
+        old_artist = Artist.objects.filter(name=artist['name'])[0]
         old_artist.real_name = artist['real_name']
         old_artist.save()
         next_songs = artist['url']
@@ -124,7 +124,7 @@ def scrap_titles(request, page):
             i = i + 1
 
             for song in songs:
-                old_song = Song.objects.get(name=song['name'])
+                old_song = Song.objects.filter(title=song['name'])[0]
                 old_song.real_title = song['real_name']
                 old_song.save()
 
@@ -138,28 +138,24 @@ def find_me(request, artist_name, song_title):
     name = ''.join(e for e in name if str(e).isalnum())
     title = unicodedata.normalize('NFD', song_title)
     title = ''.join(e for e in title if str(e).isalnum())
-    # artists = list(Artist.objects.values_list('real_name', flat=True))
-    artists = list(Artist.objects.values_list('name', flat=True))
+    artists = list(Artist.objects.values_list('real_name', flat=True))
     if artists:
         probable_artists = process.extract(artist_name, artists, limit=3)
         if probable_artists and probable_artists[0][1] > 60:
             for artist in probable_artists:
-                # songs = list(Song.objects.filter(artist__name=artist[0]).values_list('real_title', flat=True))
-                songs = list(Song.objects.filter(artist__name=artist[0]).values_list('title', flat=True))
+                songs = list(Song.objects.filter(artist__name=artist[0]).values_list('real_title', flat=True))
                 if songs:
                     probable_song = process.extractOne(song_title, songs)
                 else:
                     break
                 if probable_song and probable_song[1] > 60:
-                    # song = Song.objects.get(real_title=probable_song[0], artist__name=artist[0])
-                    song = Song.objects.get(title=probable_song[0], artist__name=artist[0])
+                    song = Song.objects.get(real_title=probable_song[0], artist__name=artist[0])
                     del(song.__dict__['_state'])
                     del(song.__dict__['id'])
                     del(song.__dict__['artist_id'])
                     song.__dict__['artist'] = artist[0]
                     return JsonResponse(song.__dict__)
-            # old_artist = Artist.objects.get(real_name=probable_artists[0][0])
-            old_artist = Artist.objects.get(name=probable_artists[0][0])
+            old_artist = Artist.objects.get(real_name=probable_artists[0][0])
             new_song = Song(artist=old_artist, title=title, real_title=song_title, lyrics='Mbola tsy misy')
             new_song.save()
             return JsonResponse({})
