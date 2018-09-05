@@ -144,13 +144,13 @@ def find_me(request, artist_name, song_title):
         probable_artists = process.extract(artist_name, artists, limit=3)
         if probable_artists and probable_artists[0][1] > 60:
             for artist in probable_artists:
-                songs = list(Song.objects.filter(artist__name=artist[0]).values_list('real_title', flat=True))
+                songs = list(Song.objects.filter(artist__real_name=artist[0]).values_list('real_title', flat=True))
                 if songs:
                     probable_song = process.extractOne(song_title, songs)
                 else:
                     break
                 if probable_song and probable_song[1] > 60:
-                    song = Song.objects.get(real_title=probable_song[0], artist__name=artist[0])
+                    song = Song.objects.filter(real_title=probable_song[0], artist__real_name=artist[0])[0]
                     del(song.__dict__['_state'])
                     del(song.__dict__['id'])
                     del(song.__dict__['artist_id'])
