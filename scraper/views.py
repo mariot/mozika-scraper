@@ -106,7 +106,7 @@ def scrap_artist(request, id, artist, page):
 
 
 def find_me(request, artist_name, song_title, fb_id):
-    user = User.objects.get_or_create(fbid=fb_id)
+    user, _ = User.objects.get_or_create(fbid=fb_id)
     artists = list(Artist.objects.values_list('name', flat=True))
     if artists:
         probable_artists = process.extract(artist_name, artists, limit=3)
