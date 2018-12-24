@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from rest_framework import viewsets
 from scraper.serializers import ArtistSerializer, SongSerializer, UserSerializer
-from scraper.models import Artist, Song, User
+from scraper.models import Artist, Song, User, Consultation
 from django.http import HttpResponse, JsonResponse
 from fuzzywuzzy import process
 import requests
@@ -105,7 +105,8 @@ def scrap_artist(request, id, artist, page):
     return HttpResponse(html)
 
 
-def find_me(request, artist_name, song_title):
+def find_me(request, artist_name, song_title, fb_id):
+    user = User.objects.get_or_create(fbid=fb_id)
     artists = list(Artist.objects.values_list('name', flat=True))
     if artists:
         probable_artists = process.extract(artist_name, artists, limit=3)
@@ -118,6 +119,13 @@ def find_me(request, artist_name, song_title):
                     break
                 if probable_song and probable_song[1] > 70:
                     song = Song.objects.filter(title=probable_song[0], artist__name=artist[0])[0]
+                    artist = song.artist
+                    artist.hits += 1
+                    artist.save()
+                    song.hits += 1
+                    song.save()
+                    consultation = Consultation(user=user, song=song)
+                    consultation.save()
                     del(song.__dict__['_state'])
                     del(song.__dict__['id'])
                     del(song.__dict__['artist_id'])
