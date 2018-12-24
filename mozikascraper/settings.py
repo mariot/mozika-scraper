@@ -37,9 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'scraper',
-    'rest_framework',
-    'drf_generators',
-    'django_filters'
+    'rest_framework'
 )
 
 MIDDLEWARE = [
@@ -77,14 +75,28 @@ WSGI_APPLICATION = 'mozikascraper.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-if os.environ.get('DEBUG') == 'True':
-    DEBUG = True
+DEBUG = os.environ.get('DEBUG')
+
+if os.environ.get('ENV') == 'local':
     ALLOWED_HOSTS = ['*']
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+elif os.environ.get('ENV') == 'preprod':
+    ALLOWED_HOSTS = ['*']
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ.get('DATABASE_NAME'),
+            'USER': os.environ.get('DATABASE_USER'),
+            'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+            'HOST': 'localhost',
+            'PORT': ''
         }
     }
 else:
