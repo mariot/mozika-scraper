@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from rest_framework import viewsets
-from scraper.serializers import ArtistSerializer, SongSerializer
-from scraper.models import Artist, Song
+from scraper.serializers import ArtistSerializer, SongSerializer, UserSerializer
+from scraper.models import Artist, Song, User
 from django.http import HttpResponse, JsonResponse
 from fuzzywuzzy import process
 import requests
@@ -138,3 +138,8 @@ class ArtistViewSet(viewsets.ModelViewSet):
 class SongViewSet(viewsets.ModelViewSet):
     queryset = Song.objects.all()
     serializer_class = SongSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
