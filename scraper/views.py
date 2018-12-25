@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from rest_framework import viewsets
 from scraper.serializers import ArtistSerializer, SongSerializer, UserSerializer
-from scraper.models import Artist, Song, User, Consultation
+from scraper.models import Artist, Song, User, Consultation, MissingSong, FailedConsultation
 from django.http import HttpResponse, JsonResponse
 from fuzzywuzzy import process
 import requests
@@ -133,6 +133,13 @@ def find_me(request, artist_name, song_title, fb_id):
                     return JsonResponse(song.__dict__)
     return JsonResponse({})
 
+
+def missing_song(request, artist_name, song_title, fb_id):
+    user, _ = User.objects.get_or_create(fbid=fb_id)
+    missing_song = MissingSong(artist=artist_name, title=song_title)
+    missing_song.save()
+    failed_consultation = FailedConsultation(user=user, song=missing_song)
+    failed_consultation.save()
 
 def policy(request):
     return render_to_response('privacypolicy.html')

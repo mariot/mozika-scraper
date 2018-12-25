@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from scraper.models import Artist, Song, User
+from scraper.models import Artist, Song, User, MissingSong
 
 
 class ArtistSerializer(ModelSerializer):
@@ -14,6 +14,7 @@ class SongSerializer(ModelSerializer):
     class Meta:
         model = Song
         fields = '__all__'
+
 
 class UserSerializer(ModelSerializer):
 
