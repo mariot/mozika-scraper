@@ -141,11 +141,17 @@ def missing_song(request, artist_name, song_title, fb_id):
     return JsonResponse({})
 
 
-def user(request, name, fb_id):
+def set_user(request, name, fb_id):
     user, created = User.objects.get_or_create(fbid=fb_id)
     if created or user.name is "" or user.name != name:
         user.name = name
         user.save()
+    del (user.__dict__['_state'])
+    return JsonResponse(user.__dict__)
+
+
+def get_user(request, fb_id):
+    user, _ = User.objects.get_or_create(fbid=fb_id)
     del (user.__dict__['_state'])
     return JsonResponse(user.__dict__)
 
