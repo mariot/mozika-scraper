@@ -140,6 +140,7 @@ def missing_song(request, artist_name, song_title, fb_id):
     missing_song.save()
     failed_consultation = FailedConsultation(user=user, song=missing_song)
     failed_consultation.save()
+    return JsonResponse({})
 
 def policy(request):
     return render_to_response('privacypolicy.html')
