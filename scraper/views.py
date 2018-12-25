@@ -119,9 +119,9 @@ def find_me(request, artist_name, song_title, fb_id):
                     break
                 if probable_song and probable_song[1] > 70:
                     song = Song.objects.filter(title=probable_song[0], artist__name=artist[0])[0]
-                    artist = song.artist
-                    artist.hits += 1
-                    artist.save()
+                    artist_obj = song.artist
+                    artist_obj.hits += 1
+                    artist_obj.save()
                     song.hits += 1
                     song.save()
                     consultation = Consultation(user=user, song=song)
