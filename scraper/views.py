@@ -1,6 +1,4 @@
 from django.shortcuts import render_to_response
-from rest_framework import viewsets
-from scraper.serializers import ArtistSerializer, SongSerializer, UserSerializer
 from scraper.models import Artist, Song, User, Consultation, MissingSong, FailedConsultation
 from django.http import HttpResponse, JsonResponse
 from fuzzywuzzy import process
@@ -142,20 +140,15 @@ def missing_song(request, artist_name, song_title, fb_id):
     failed_consultation.save()
     return JsonResponse({})
 
+
+def user(request, name, fb_id):
+    user, created = User.objects.get_or_create(fbid=fb_id)
+    if created or user.name is "" or user.name != name:
+        user.name = name
+        user.save()
+    del (user.__dict__['_state'])
+    return JsonResponse(user.__dict__)
+
+
 def policy(request):
     return render_to_response('privacypolicy.html')
-
-
-class ArtistViewSet(viewsets.ModelViewSet):
-    queryset = Artist.objects.all()
-    serializer_class = ArtistSerializer
-
-
-class SongViewSet(viewsets.ModelViewSet):
-    queryset = Song.objects.all()
-    serializer_class = SongSerializer
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
