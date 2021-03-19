@@ -3,7 +3,7 @@ Django==2.0.11
 gunicorn==19.6.0
 whitenoise==3.3.0
 feedparser>=1.0
-djangorestframework==3.9.1
+djangorestframework==3.11.2
 drf-generators==0.2.8
 beautifulsoup4==4.4.1
 requests==2.20.0
